@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Settings</title>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+  <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+  <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>if (window.module) module = window.module;</script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container text-center">
+  <h1>Settings</h1>
+</div>
+<div class="container" style="border: 1px solid black;padding:10px;border-radius:5px;">
+  <h4>Image Settings:</h4>
+  <div class="container text-center">
+  <p>Number of Images per row per Observation case: </p>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a1" value="1"> 1</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a2" value="2"> 2</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a3" value="3"> 3</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a4" value="4"> 4</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a5" value="5"> 5</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a6" value="6"> 6</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a7" value="7"> 7</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a8" value="8"> 8</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a9" value="9"> 9</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="a10" value="10"> 10</span>
+  <span style="border:1px solid #94baf7;padding: 5px;background-color:#d3e4ff"><input type="radio" name="limit" id="ainfinite" value="infinite"> infinite</span>
+  </div>
+</div>
+<br>
+<div class="container" style="border: 1px solid #555;border-radius:5px;">
+  <h4>Order Settings: <button class="btn btn-xs btn-default" onclick="basicSort()">Basic Sort</button> </h4>
+<ul id="sortable">
+</ul>
+</div>
+<br>
+<div class="container text-center">
+ <button class="btn btn-primary btn-block" onclick="sendStock()">Save and Exit</button>
+</div>
+
+<script>
+var electron = require('electron');
+var currentWindow = electron.remote.getCurrentWindow();
+const {ipcRenderer} = require('electron')
+
+var obj
+
+function updateDOM(){
+  document.getElementById('sortable').innerHTML = ""
+  for(var i in obj["stock"]){
+    var tag=""
+    if(obj["obs"][obj["stock"][i]]["criticality"]=="High")
+      tag="danger"
+    else if(obj["obs"][obj["stock"][i]]["criticality"]=="Medium")
+      tag="warning"
+    else if(obj["obs"][obj["stock"][i]]["criticality"]=="Low")
+      tag="success"
+    $('#sortable').append("<li class=\"ui-state-highlight\" id="+obj["stock"][i]+">"+obj["obs"][obj["stock"][i]]["observation"]+" <span class=\"label label-"+tag+"\">"+obj["obs"][obj["stock"][i]]["criticality"]+"</span></li>");
+  }
+}
+
+$(document).ready(function(){
+  list = currentWindow.custom.file_obj.stock
+  obj = currentWindow.custom.file_obj
+  document.getElementById("a"+obj["img_limit"]).checked = true;
+  updateDOM()
+  $("#sortable").sortable({
+    update: function(event, ui){
+      $(this).children().each(function(index){
+        list[index]= $(this).attr('id')
+      })
+      obj["stock"] = list.slice()
+    }
+  });
+});
+
+function basicSort(){
+  let highObs=[]
+  let medObs=[]
+  let lowObs=[]
+  for(var i in obj["stock"]){
+    if(obj["obs"][obj["stock"][i]]["criticality"]=="High")
+    { highObs.push(obj["stock"][i])}
+    else if(obj["obs"][obj["stock"][i]]["criticality"]=="Medium")
+    { medObs.push(obj["stock"][i])}
+    else if(obj["obs"][obj["stock"][i]]["criticality"]=="Low")
+    { lowObs.push(obj["stock"][i])}
+  }
+  console.log("High ", highObs)
+  console.log("Med ", medObs)
+  console.log("Low ", lowObs)
+  obj["stock"] = highObs.concat(medObs).concat(lowObs)
+//  console.log("Full List ", list)
+  updateDOM()
+}
+
+function sendStock(){
+  var radios = document.getElementsByName("limit")
+  for(var i in radios)
+  {
+    if(radios[i].checked){
+      obj["img_limit"]=radios[i].value; break;
+    }
+  }
+  ipcRenderer.send('send-updated-list',obj)
+}
+</script>
+</body>
+</html>

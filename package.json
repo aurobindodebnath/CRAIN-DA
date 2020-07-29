@@ -1,0 +1,21 @@
+{
+  "name": "Crain",
+  "version": "1.0.0",
+  "description": "Desktop Application to generate excel reports in KPMG format",
+  "main": "index.js",
+  "dependencies": {
+    "electron": "^4.2.12",
+    "exceljs": "^1.15.0",
+    "image-size": "^0.7.5",
+    "jquery": "^3.5.1"
+  },
+  "devDependencies": {
+    "electron-packager": "^13.1.1"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
