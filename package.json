@@ -4,7 +4,7 @@
   "description": "Desktop Application to generate excel reports in KPMG format",
   "main": "index.js",
   "dependencies": {
-    "electron": "^4.2.12",
+    "electron": "^22.3.25",
     "exceljs": "^1.15.0",
     "image-size": "^0.7.5",
     "jquery": "^3.5.1"
